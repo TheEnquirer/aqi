@@ -100,46 +100,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
             return m, tea.Quit
 
 	case "l":
-	    //temp := ""
-	    resp, err := http.Get("http://api.airvisual.com/v2/city?city=San%20Mateo&state=California&country=USA&key=5b78dd52-e51a-47f6-b63f-d580b4e33b83")
+	    resp, err := http.Get("http://api.airvisual.com/v2/city?city=San%20Mateo&state=California&country=USA&key=5b78dd52-e51a-47f6-b63f-d580b4e33b83") // get the resp
 	    if err != nil {
 		log.Fatalln(err)
-		// handle err
 	    }
-	    //fmt.Println(resp.Header)
-	    body, err := io.ReadAll(resp.Body)
-	    //fmt.Println(string(body))
+	    body, err := io.ReadAll(resp.Body) 
 	    defer resp.Body.Close()
-	    //JsonString := string(body)
-	    //json.Unmarshal([]byte(JsonString), temp)
-	    //fmt.Println(temp)
 
-	    //s := string("{'operation': 'get', 'key': 'example'}")
 	    s := string(body)
 	    data := Request{}
 
 	    eerr := json.Unmarshal([]byte(s), &data)
 	    if eerr != nil {
 		fmt.Println(eerr.Error()) 
-		//json: Unmarshal(non-pointer main.Request)
-	    }
+	    } // process it into a request
 
-	    //fmt.Println(data)
-	    //fmt.Printf("Operation: %s", data.Status)
-	    //fmt.Printf("Operation: %s", data.Status)
-
-	    //fmt.Printf("Operation: %s", data.Data.Pollution.Aqius)
-	    //fmt.Printf("Operation: %s", data.Data.Location.Type)
-	    aqi := data.Data.Current.Pollution.Aqius
+	    aqi := data.Data.Current.Pollution.Aqius // navigate the tree and get out aqi 
 	    fmt.Println(aqi)
-
-	    //fmt.Printf(data.Data)
-	    //fmt.Println(
-	    //err := json.Unmarshal([]byte(s), &data)
-	    //if err != nil {
-	    //    fmt.Println(err.Error()) 
-	    //    //invalid character '\'' looking for beginning of object key string
-	    //}
 
         // The "up" and "k" keys move the cursor up
         case "up", "k":
