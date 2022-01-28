@@ -51,6 +51,7 @@ func getWeather() int {
     } // process it into a request
 
     aqi := data.Data.Current.Pollution.Aqius // navigate the tree and get out aqi 
+    fmt.Println("Operation: %s", aqi)
     return aqi
 }
 
@@ -163,7 +164,11 @@ func (m model) View() string {
 
 
     // The footer
+    aqi := getWeather()
+    s += string(aqi)+"whee"
     s += "\nPress q to quit.\n"
+
+    //fmt.Println(aqi)
 
     //s += string(getWeather())
     //fmt.Println("whee")
