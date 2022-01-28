@@ -3,13 +3,15 @@ package main
 import (
     "fmt"
     "os"
-    //"io/ioutil"
+    "io"
     //"os/exec"
-    //"log"
+    "log"
+    "time"
     "net/http"
 
     tea "github.com/charmbracelet/bubbletea"
 )
+import "encoding/json"
 
 type model struct {
     choices  []string           // items on the to-do list
@@ -36,6 +38,21 @@ func (m model) Init() tea.Cmd {
     return nil
 }
 
+var myClient = &http.Client{Timeout: 10 * time.Second}
+
+type Foo struct {
+    Bar string
+}
+
+func getJson(url string, target interface{}) error {
+    r, err := myClient.Get(url)
+    if err != nil {
+        return err
+    }
+    defer r.Body.Close()
+
+    return json.NewDecoder(r.Body).Decode(target)
+}
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     switch msg := msg.(type) {
@@ -76,11 +93,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	    resp, err := http.Get("http://api.airvisual.com/v2/city?city=San%20Mateo&state=California&country=USA&key=5b78dd52-e51a-47f6-b63f-d580b4e33b83")
 	    if err != nil {
-		//log.Fatalln(err)
+		log.Fatalln(err)
 		// handle err
 	    }
-	    fmt.Println(resp)
+	    //fmt.Println(resp.Header)
+	    body, err := io.ReadAll(resp.Body)
+	    fmt.Println(string(body))
 	    defer resp.Body.Close()
+
+	    //res := exec.Command("curl", "'http://api.airvisual.com/v2/city?city=San%20Mateo&state=California&country=USA&key=5b78dd52-e51a-47f6-b63f-d580b4e33b83'")
+	    //stdin, _ := res.CombinedOutput()
+	    //fmt.Println(string(stdin))
 
 
 
@@ -146,9 +169,19 @@ func (m model) View() string {
 
 
 func main() {
+    foo1 := new(Foo) // or &Foo{}
+    getJson("http://api.airvisual.com/v2/city?city=San%20Mateo&state=California&country=USA&key=5b78dd52-e51a-47f6-b63f-d580b4e33b83", foo1)
+    println(foo1.Bar)
+    fmt.Print(foo1.Bar, "whee")
+    // alternately:
+
+    //foo2 := Foo{}
+    //getJson("http://example.com", &foo2)
+
     p := tea.NewProgram(initialModel())
     if err := p.Start(); err != nil {
         fmt.Printf("Alas, there's been an error: %v", err)
         os.Exit(1)
     }
 }
+
