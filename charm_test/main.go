@@ -6,7 +6,7 @@ import (
     "io"
     //"os/exec"
     "log"
-    "time"
+    //"time"
     "net/http"
     //import "encoding/json"
 
@@ -34,48 +34,30 @@ func initialModel() model {
 }
 
 
+func getWeather() int {
+    resp, err := http.Get("http://api.airvisual.com/v2/city?city=San%20Mateo&state=California&country=USA&key=5b78dd52-e51a-47f6-b63f-d580b4e33b83") // get the resp
+    if err != nil {
+	log.Fatalln(err)
+    }
+    body, err := io.ReadAll(resp.Body) 
+    defer resp.Body.Close()
+
+    s := string(body)
+    data := Request{}
+
+    eerr := json.Unmarshal([]byte(s), &data)
+    if eerr != nil {
+	fmt.Println(eerr.Error()) 
+    } // process it into a request
+
+    aqi := data.Data.Current.Pollution.Aqius // navigate the tree and get out aqi 
+    return aqi
+}
+
+
 func (m model) Init() tea.Cmd {
     // Just return `nil`, which means "no I/O right now, please."
     return nil
-}
-
-var myClient = &http.Client{Timeout: 10 * time.Second}
-
-type Foo struct {
-    Bar string
-}
-
-func getJson(url string, target interface{}) error {
-    r, err := myClient.Get(url)
-    if err != nil {
-        return err
-    }
-    defer r.Body.Close()
-
-    return json.NewDecoder(r.Body).Decode(target)
-}
-
-type DataStruct struct {
-    City string      `json:"'city'"`
-    State string      `json:"'state'"`
-    Country string      `json:"'country'"`
-    //Pollution PollutionStruct `json:"'pollution'"`
-    //Pollution string `json:"'pollution'"`
-    Location LocationStruct `json:"'location'"`
-    Current CurrentStruct `json:"'current'"`
-}
-
-type CurrentStruct struct {
-    Pollution PollutionStruct      `json:"'pollution'"`
-}
-
-type PollutionStruct struct {
-    Aqius int      `json:"'aqius'"`
-    //Mainus string      `json:"'mainus'"`
-}
-
-type LocationStruct struct {
-    Type string      `json:"'type'"`
 }
 
 type Request struct {
@@ -85,6 +67,27 @@ type Request struct {
     Status string         `json:"'success'"`
     Data DataStruct       `json:"'data'"`
 }
+
+type DataStruct struct {
+    City string      `json:"'city'"`
+    State string      `json:"'state'"`
+    Country string      `json:"'country'"`
+    Location LocationStruct `json:"'location'"`
+    Current CurrentStruct `json:"'current'"`
+}
+
+type LocationStruct struct {
+    Type string      `json:"'type'"`
+}
+
+type CurrentStruct struct {
+    Pollution PollutionStruct      `json:"'pollution'"`
+}
+
+type PollutionStruct struct {
+    Aqius int      `json:"'aqius'"`
+}
+
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     switch msg := msg.(type) {
@@ -100,22 +103,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
             return m, tea.Quit
 
 	case "l":
-	    resp, err := http.Get("http://api.airvisual.com/v2/city?city=San%20Mateo&state=California&country=USA&key=5b78dd52-e51a-47f6-b63f-d580b4e33b83") // get the resp
-	    if err != nil {
-		log.Fatalln(err)
-	    }
-	    body, err := io.ReadAll(resp.Body) 
-	    defer resp.Body.Close()
-
-	    s := string(body)
-	    data := Request{}
-
-	    eerr := json.Unmarshal([]byte(s), &data)
-	    if eerr != nil {
-		fmt.Println(eerr.Error()) 
-	    } // process it into a request
-
-	    aqi := data.Data.Current.Pollution.Aqius // navigate the tree and get out aqi 
+	    aqi := getWeather()
 	    fmt.Println(aqi)
 
         // The "up" and "k" keys move the cursor up
@@ -164,31 +152,27 @@ func (m model) View() string {
         // Is this choice selected?
         checked := " " // not selected
         if _, ok := m.selected[i]; ok {
-            checked = "x" // selected!
+	    checked = "x" // selected!
+	    //checked = string(getWeather()) // selected!
+	    //fmt.Println(string(getWeather()))
         }
 
         // Render the row
         s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
     }
 
+
     // The footer
     s += "\nPress q to quit.\n"
 
+    //s += string(getWeather())
+    //fmt.Println("whee")
     // Send the UI for rendering
     return s
 }
 
 
 func main() {
-    foo1 := new(Foo) // or &Foo{}
-    getJson("http://api.airvisual.com/v2/city?city=San%20Mateo&state=California&country=USA&key=5b78dd52-e51a-47f6-b63f-d580b4e33b83", foo1)
-    println(foo1.Bar)
-    fmt.Print(foo1.Bar, "whee")
-    // alternately:
-
-    //foo2 := Foo{}
-    //getJson("http://example.com", &foo2)
-
     p := tea.NewProgram(initialModel())
     if err := p.Start(); err != nil {
         fmt.Printf("Alas, there's been an error: %v", err)
