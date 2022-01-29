@@ -16,13 +16,6 @@ import (
 )
 import "encoding/json"
 
-type model struct {
-    choices  []string           // items on the to-do list
-    cursor   int                // which to-do list item our cursor is pointing at
-    selected map[int]struct{}   // which to-do items are selected
-}
-
-
 type Request struct {
     Operation string      `json:"operation"`
     Key string            `json:"key"`
@@ -67,16 +60,25 @@ type CityNameStruct struct {
     City string   `json:"'city'"`
 }
 
-func initialModel() model {
-	return model{
-		// Our shopping list is a grocery list
-		choices:  []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
+type model struct {
+    choices  []string           // items on the to-do list
+    //cursor   int                // which to-do list item our cursor is pointing at
+    //selected map[int]struct{}   // which to-do items are selected
+    aqi string
+}
 
-		// A map which indicates which choices are selected. We're using
-		// the  map like a mathematical set. The keys refer to the indexes
-		// of the `choices` slice, above.
-		selected: make(map[int]struct{}),
-	}
+func initialModel(aqii int) model {
+    //fmt.Println(aqii, "the aqi!!")
+    return model{
+	aqi: string(aqii),
+	// Our shopping list is a grocery list
+	choices:  []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
+
+	// A map which indicates which choices are selected. We're using
+	// the  map like a mathematical set. The keys refer to the indexes
+	// of the `choices` slice, above.
+	//selected: make(map[int]struct{}),
+    }
 }
 
 
@@ -99,7 +101,7 @@ func getWeather(city *selection.Choice) int {
     } // process it into a request
 
     aqi := data.Data.Current.Pollution.Aqius // navigate the tree and get out aqi 
-    fmt.Println(aqi)
+    //fmt.Println(aqi)
     return aqi
 }
 
@@ -113,7 +115,6 @@ func getCities() []string {
     defer resp.Body.Close()
 
     s := string(body)
-    //fmt.Println(s)
     data := CityRequest{}
 
     eerr := json.Unmarshal([]byte(s), &data)
@@ -121,19 +122,12 @@ func getCities() []string {
 	fmt.Println(eerr.Error()) 
     } // process it into a request
 
-    //aqi := data.Data.Current.Pollution.Aqius // navigate the tree and get out aqi 
     cityData := data
-    //fmt.Println(cityData.Data[0].City, "huhmm?")
-
-    //sdata := [...]string{"Ned", "Edd", "Jon", "Jeor", "Jorah"}
     cityNames := make([]string, len(cityData.Data))
 
     for i := 0; i < len(cityData.Data); i++ {
 	cityNames = append(cityNames, cityData.Data[i].City)
     }
-    //_ = cityData
-    //fmt.Println("Operation: %s", aqi)
-    //fmt.Println(cityNames)
     return cityNames
 }
 
@@ -143,6 +137,7 @@ func (m model) Init() tea.Cmd {
     return nil
 }
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+    //fmt.Println("updating")
     switch msg := msg.(type) {
 
     // Is it a key press?
@@ -155,11 +150,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         case "ctrl+c", "q":
             return m, tea.Quit
 
-	case "l":
-	    //aqi := getWeather()
-	    //fmt.Println(aqi)
-	    //return 
-	    fmt.Println("")
+	//case "l":
+	//    //aqi := getWeather()
+	//    //fmt.Println(aqi)
+	//    //return 
+	//    fmt.Println("")
 	}
     }
 
@@ -171,32 +166,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
     // The header
-    s := "What should we buy at the market?\n\n"
+    s := string(setAqi)
     s += "\nPress q to quit.\n"
+    fmt.Println(m, "the aqii")
 
     // Send the UI for rendering
     return s
 }
 
-//func initPicker 
-
+var setAqi int = -1
 
 func main() {
-    //sp := selection.New("What do you pick?",
-    //selection.Choices(getCities()))
-    //sp.PageSize = 3
-
-    //getCities()
-
-
 
     cities := getCities()
     sp := selection.New("What city do you want to search for?",
 	selection.Choices(cities))
-	//selection.Choices([]string{"Horse", "Car", "Plane", "Bike"}))
-    //selection.Choices(getCities()))
     sp.PageSize = 3
-    //sp.Placeholder = "San Mateo"
 
     choice, err := sp.RunPrompt()
     if err != nil {
@@ -204,17 +189,17 @@ func main() {
 	os.Exit(1)
     }
 
-    // do something with the final choice
     //_ = choice
     aqi := getWeather(choice)
-    _ = aqi
-    //fmt.Println(choice)
+    setAqi = aqi
+    //_ = aqi
+    //fmt.Println(aqi)
 
-    //p := tea.NewProgram(initialModel())
-    //if err := p.Start(); err != nil {
-    //    fmt.Printf("Alas, there's been an error: %v", err)
-    //    os.Exit(1)
-    //}
+    p := tea.NewProgram(initialModel(aqi))
+    if err := p.Start(); err != nil {
+	fmt.Printf("Alas, there's been an error: %v", err)
+	os.Exit(1)
+    }
     //os.Exit(0)
 
 }
