@@ -11,6 +11,7 @@ import (
     //import "encoding/json"
     "github.com/erikgeiser/promptkit/selection"
     "strings"
+    "strconv"
 
     tea "github.com/charmbracelet/bubbletea"
 )
@@ -65,12 +66,16 @@ type model struct {
     //cursor   int                // which to-do list item our cursor is pointing at
     //selected map[int]struct{}   // which to-do items are selected
     aqi string
+    aqme string
 }
 
 func initialModel(aqii int) model {
     //fmt.Println(aqii, "the aqi!!")
+    //test := strconv.Itoa(10)
+    //fmt.Println(test)
     return model{
-	aqi: string(aqii),
+	aqi: strconv.Itoa(aqii),
+	//aqme: "0",
 	// Our shopping list is a grocery list
 	choices:  []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
 
@@ -167,8 +172,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
     // The header
     s := string(setAqi)
+    //s += string(m)
+    s += m.aqi
+
     s += "\nPress q to quit.\n"
-    fmt.Println(m, "the aqii")
+    //fmt.Println(m, "the aqii")
 
     // Send the UI for rendering
     return s
