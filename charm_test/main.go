@@ -22,7 +22,7 @@ import "encoding/json"
 
 
 
-
+fmt.Println
 
 const (
 	padding  = 2
@@ -33,10 +33,20 @@ var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("#626262")).Render
 
 type tickMsg time.Time
 
+var inc = 0
+
 func tickCmd() tea.Cmd {
-	return tea.Tick(time.Second*1, func(t time.Time) tea.Msg {
-		return tickMsg(t)
-	})
+    return tea.Tick(time.Second*time.Duration(inc), func(t time.Time) tea.Msg {
+	//inc = 0
+	if inc == 0 {
+	    inc = 1
+	} else {
+	    //fmt.Println("asfd")
+	    inc = -1
+	}
+
+	return tickMsg(t)
+    })
 }
 
 /////////////////////////
@@ -169,6 +179,7 @@ func (_ model) Init() tea.Cmd {
     return tickCmd()
     //return nil
 }
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
     //fmt.Println("updating")
     switch msg := msg.(type) {
@@ -201,9 +212,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	    return m, tea.Quit
 	}
 
+	//fmt.Println("yes")
+
 	// Note that you can also use progress.Model.SetPercent to set the
 	// percentage value explicitly, too.
-	cmd := m.progress.IncrPercent(0.25)
+	I, _ := strconv.Atoi(m.aqi)
+	//if inc == 1 {
+	//    I = 100
+	//}
+	cmd := m.progress.IncrPercent(float64(I)/float64(100))
 	return m, tea.Batch(tickCmd(), cmd)
 
 	// FrameMsg is sent when the progress bar wants to animate itself
@@ -226,10 +243,10 @@ func (m model) View() string {
     s := m.aqi
     pad := strings.Repeat(" ", padding)
 
-    s += "\nPress q to quit.\n"
-    return "\n" +
+    //s += "\nPress q to quit.\n"
+    return "\n" + s + "\n" + "\n" +
 	pad + m.progress.View() + "\n\n" +
-	pad + helpStyle("Press any key to quit")
+	pad + helpStyle("Press q to quit")
 
     //fmt.Println(m, "the aqii")
 
@@ -238,8 +255,6 @@ func (m model) View() string {
 }
 
 var setAqi int = -1
-
-
 
 func main() {
 
@@ -266,7 +281,6 @@ func main() {
 	os.Exit(1)
     }
     //os.Exit(0)
-
 }
 
 
