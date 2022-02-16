@@ -22,7 +22,6 @@ import "encoding/json"
 
 
 
-fmt.Println
 
 const (
 	padding  = 2
@@ -216,7 +215,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Note that you can also use progress.Model.SetPercent to set the
 	// percentage value explicitly, too.
-	I, _ := strconv.Atoi(m.aqi)
+I, _ := strconv.Atoi(m.aqi)
 	//if inc == 1 {
 	//    I = 100
 	//}
