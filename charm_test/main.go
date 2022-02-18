@@ -196,7 +196,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	    //case "l":
 	    //    //aqi := getWeather()
 	    //    //fmt.Println(aqi)
-	    //    //return 
+	    //    //return
 	    //    fmt.Println("")
 	}
     case tea.WindowSizeMsg:
@@ -219,7 +219,7 @@ I, _ := strconv.Atoi(m.aqi)
 	//if inc == 1 {
 	//    I = 100
 	//}
-	cmd := m.progress.IncrPercent(float64(I)/float64(100))
+	cmd := m.progress.IncrPercent(float64(I)/float64(150))
 	return m, tea.Batch(tickCmd(), cmd)
 
 	// FrameMsg is sent when the progress bar wants to animate itself
@@ -243,8 +243,13 @@ func (m model) View() string {
     pad := strings.Repeat(" ", padding)
 
     //s += "\nPress q to quit.\n"
-    return "\n" + s + "\n" + "\n" +
-	pad + m.progress.View() + "\n\n" +
+    return "\n" +
+	//pad + "  ----" + "\n" +
+	pad + "|" +pad + pad + s + pad + pad + "|" + "\n" +
+	//pad + "  ----" + "\n" +
+	"\n" +
+	pad + m.progress.View() + "\n\n" + pad + "of dangerous levels." +
+	"\n\n" +
 	pad + helpStyle("Press q to quit")
 
     //fmt.Println(m, "the aqii")
@@ -258,7 +263,8 @@ var setAqi int = -1
 func main() {
 
     cities := getCities()
-    sp := selection.New("What city do you want to search for?",
+    pad := strings.Repeat(" ", padding)
+    sp := selection.New("\n"+ pad + "What city do you want to search for?",
 	selection.Choices(cities))
     sp.PageSize = 3
 
