@@ -114,6 +114,7 @@ func initialModel(aqii int) model {
 	// Our shopping list is a grocery list
 	choices:  []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
 	progress: progress.New(progress.WithDefaultGradient()),
+	//progress: progress.New(progress.WithGradient("#93edb3", "#d96d6d")),
 
 	// A map which indicates which choices are selected. We're using
 	// the  map like a mathematical set. The keys refer to the indexes
@@ -215,7 +216,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Note that you can also use progress.Model.SetPercent to set the
 	// percentage value explicitly, too.
-I, _ := strconv.Atoi(m.aqi)
+	I, _ := strconv.Atoi(m.aqi)
 	//if inc == 1 {
 	//    I = 100
 	//}
