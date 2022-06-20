@@ -19,10 +19,6 @@ import (
 )
 import "encoding/json"
 
-
-
-
-
 const (
 	padding  = 2
 	maxWidth = 80
@@ -36,11 +32,9 @@ var inc = 0
 
 func tickCmd() tea.Cmd {
     return tea.Tick(time.Second*time.Duration(inc), func(t time.Time) tea.Msg {
-	//inc = 0
 	if inc == 0 {
 	    inc = 1
 	} else {
-	    //fmt.Println("asfd")
 	    inc = -1
 	}
 
@@ -96,9 +90,7 @@ type CityNameStruct struct {
 }
 
 type model struct {
-    choices  []string           // items on the to-do list
-    //cursor   int                // which to-do list item our cursor is pointing at
-    //selected map[int]struct{}   // which to-do items are selected
+    choices  []string
     aqi string
     aqme string
     progress progress.Model
@@ -288,25 +280,4 @@ func main() {
     }
     //os.Exit(0)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
